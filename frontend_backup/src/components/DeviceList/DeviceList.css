@@ -1,0 +1,217 @@
+/* =========================
+   Container
+   ========================= */
+.dl-container {
+  max-width: 95%;
+  margin: 40px auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Roboto, sans-serif;
+  position: relative;
+}
+
+/* =========================
+   Top Bar
+   ========================= */
+.dl-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.dl-topbar h2 {
+  font-size: 22px;
+  color: #333;
+  font-weight: 600;
+}
+
+.dl-topbuttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dl-addbtn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dl-addbtn:hover {
+  background: #218838;
+}
+
+.dl-logoutbtn {
+  background: #e63946;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dl-logoutbtn:hover {
+  background: #c82333;
+}
+
+/* =========================
+   Table Styles
+   ========================= */
+.dl-tablewrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+}
+
+.dl-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.dl-table thead {
+  background: #3f5874;
+  color: white;
+  font-weight: 600;
+}
+
+.dl-table th,
+.dl-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #364353;
+  font-size: 14px;
+
+  padding-bottom: 1%;
+}
+
+.dl-table tbody tr:nth-child(odd) {
+  background: #ffffff;
+}
+
+.dl-table tbody tr:nth-child(even) {
+  background: #f4f7fb;
+}
+
+.dl-table tbody tr:hover {
+  background: #e8f0ff;
+  transition: background 0.2s ease;
+}
+
+.dl-table td {
+  color: #333;
+  white-space: nowrap;
+}
+
+/* =========================
+   Action Menu
+   ========================= */
+.dl-actionmenu {
+  position: relative;
+  display: inline-block;
+}
+
+.dl-menudot {
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  color: #555;
+}
+
+.dl-menudot:hover {
+  color: #007bff;
+}
+
+.dl-menudropdown {
+  position: absolute;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(5px);
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.dl-menudropdown.dd-below,
+.dl-menudropdown.dd-above {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dl-menudropdown.dd-above {
+  bottom: 100%;
+  top: auto;
+  margin-bottom: 6px;
+}
+
+.dl-menudropdown.dd-below {
+  top: 22px;
+  bottom: auto;
+  margin-top: 6px;
+}
+
+.dl-menuitem {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.dl-menuitem:hover {
+  background: #f4f7fb;
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* =========================
+   Bind Device Modal
+   ========================= */
+.dl-bindmodal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  z-index: 10000;
+}
+
+.dl-userlist {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 15px 0;
+}
+
+.dl-useritem {
+  margin-bottom: 8px;
+}
+
+.dl-useritem.dl-binded {
+  color: gray;
+  font-style: italic;
+}
+
+.dl-modalactions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

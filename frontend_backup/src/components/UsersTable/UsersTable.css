@@ -1,0 +1,145 @@
+/* Container */
+.ut-container {
+  margin-top: 5%;
+  width: 100%;
+  padding: 25px;
+  box-sizing: border-box;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* Top bar */
+.ut-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e6e8f0;
+}
+
+.ut-topbar-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #2b2f42;
+}
+
+/* Buttons */
+.ut-btn {
+  padding: 9px 18px;
+  border: none;
+  background: linear-gradient(135deg, #ff6b6b, #d94343);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(255, 0, 0, 0.22);
+  transition: all 0.2s ease;
+}
+
+.ut-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(255, 0, 0, 0.32);
+}
+
+/* Table wrapper */
+.ut-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Table */
+.ut-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.ut-table th {
+  background: #4058de;
+  color: white;
+  padding: 14px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ut-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7f3;
+  font-size: 14px;
+  color: #2f3147;
+}
+
+.ut-table tbody tr {
+  transition: all 0.15s ease-in-out;
+}
+
+.ut-table tbody tr:hover {
+  background-color: #f3f5ff;
+}
+
+/* Action menu (three dots) */
+.ut-menu-dot {
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  user-select: none;
+  color: #444;
+  transition: 0.2s;
+}
+
+.ut-menu-dot:hover {
+  color: #000;
+}
+
+/* Dropdown menu */
+.ut-action-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.ut-dropdown {
+  position: absolute;
+  min-width: 130px;
+  background: #fff;
+  border: 1px solid #dcdff1;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 2000;
+  overflow: hidden;
+  animation: utFade 0.18s ease-out;
+}
+
+@keyframes utFade {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ut-dropdown-below {
+  top: 24px;
+  left: 0;
+}
+
+.ut-dropdown-above {
+  bottom: 24px;
+  left: 0;
+}
+
+/* Menu items */
+.ut-dropdown-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid #eef0fa;
+  transition: background 0.15s;
+}
+
+.ut-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.ut-dropdown-item:hover {
+  background-color: #f3f5ff;
+}

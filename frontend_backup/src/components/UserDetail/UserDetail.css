@@ -1,0 +1,255 @@
+/* ============================================
+   PREMIUM USER DETAIL PAGE (FINAL VERSION)
+   ============================================ */
+
+.udp-container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: auto;
+  font-family: "Inter", "Poppins", sans-serif;
+  background: #f5f7fb;
+}
+
+/* -----------------------------
+   Top Buttons (Premium Glass)
+------------------------------ */
+.udp-buttons-container {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.udp-btn {
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(12px);
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
+  transition: 0.25s ease;
+}
+
+.udp-back-btn {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+.udp-back-btn:hover { transform: translateY(-2px); }
+
+.udp-change-password-btn {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+}
+.udp-change-password-btn:hover { transform: translateY(-2px); }
+
+.udp-notify-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+.udp-notify-btn:hover { transform: translateY(-2px); }
+
+/* -----------------------------
+   Title
+------------------------------ */
+.udp-title {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 22px;
+  color: #1f2937;
+}
+
+/* -----------------------------
+   User Info Glass Card
+------------------------------ */
+.udp-user-box {
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 8px 26px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.udp-user-box p {
+  margin: 12px 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+/* -----------------------------
+   Subtitles
+------------------------------ */
+.udp-subtitle {
+  margin: 35px 0 15px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* -----------------------------
+   Device Table Premium Style
+------------------------------ */
+.udp-device-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.udp-device-table thead th {
+  padding: 14px;
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+  color: white;
+  text-align: left;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.udp-device-table tbody tr {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.06);
+  transition: 0.25s ease;
+}
+
+.udp-device-table tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.12);
+}
+
+.udp-device-table td {
+  padding: 15px;
+  font-size: 15px;
+  color: #374151;
+}
+
+.udp-device-table tbody tr td:first-child {
+  border-radius: 12px 0 0 12px;
+}
+.udp-device-table tbody tr td:last-child {
+  border-radius: 0 12px 12px 0;
+}
+
+/* -----------------------------
+   Notification Box
+------------------------------ */
+
+.udp-notify-box {
+  background: white;
+  padding: 25px;
+  width: 400px;
+  border-radius: 16px;
+  box-shadow: 0px 10px 28px rgba(0,0,0,0.12);
+  animation: fadeIn 0.3s ease;
+}
+
+.udp-notify-box input,
+.udp-notify-box textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.udp-notify-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  gap: 10px;
+}
+
+.udp-send-btn { background: #10b981; }
+.udp-cancel-btn { background: #ef4444; }
+
+/* -----------------------------
+   Password Box
+------------------------------ */
+.udp-password-box {
+  background: white;
+  width: 420px;
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
+  animation: fadeIn 0.3s ease;
+}
+
+.udp-password-box label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 10px;
+}
+
+.udp-password-box input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fafafa;
+}
+
+/* -----------------------------
+   Dropdown Menu (Matching Premium)
+------------------------------ */
+
+.action-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.menu-dot {
+  cursor: pointer;
+  font-size: 22px;
+  padding: 4px;
+  border-radius: 8px;
+  transition: 0.25s;
+}
+
+.menu-dot:hover {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.menu-dropdown {
+  position: absolute;
+  min-width: 150px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0px 14px 30px rgba(0,0,0,0.16);
+  overflow: hidden;
+  animation: fadeMenu 0.25s ease-out;
+  z-index: 999;
+}
+
+.menu-dropdown.below { top: 30px; left: 0; }
+.menu-dropdown.above { bottom: 30px; left: 0; }
+
+.menu-item {
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s ease;
+  color: #374151;
+}
+
+.menu-item:hover {
+  background: #eef2ff;
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+/* -----------------------------
+   Animations
+------------------------------ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeMenu {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

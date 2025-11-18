@@ -1,0 +1,321 @@
+/* DeviceDetail.css */
+.Container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #e4dddd;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.Heading h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-bottom: 20px;
+}
+
+.tank-water1 {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-direction: row;
+  width: 72%;
+  gap: 20px;
+}
+
+.tank-visualization {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+  border: 6px solid #ffffff;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.tank-image {
+  position: relative;
+  width: 35%;
+  height: 250px;
+  border-radius: 6px;
+  border: 4px solid #000000;
+  margin: 0 auto;
+  background-color: #f4f4f4;
+  overflow: hidden;
+}
+
+.tank-image-upper {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tank-image-upper button {
+  width: 60px;
+  height: 20px;
+  background-color: #333;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.tank-image-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgb(2, 132, 253);
+  overflow: hidden;
+  border-radius: 0;
+  transition: height 1.2s ease-in-out;
+}
+.waves {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  margin-bottom: 10px;
+}
+
+.waves use {
+  animation: moveWaves 4s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+@keyframes moveWaves {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+
+.tank-percentage {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.tank-info {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px 25px;
+  color: #333;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+  border: 6px solid #ffffff;
+  width: 100%;
+  line-height: 1.8;
+  transition: all 0.3s ease;
+}
+
+.tank-info h2 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: #222;
+  text-align: center;
+}
+
+.tank-info hr {
+  border: none;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin-bottom: 15px;
+}
+
+.tank-info p {
+  margin: 6px 0;
+  font-size: 15px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-online {
+  background-color: #4caf50;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+}
+
+.status-offline {
+  background-color: #dc3545;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+}
+
+.tank-water2 {
+  margin-top: 2%;
+  background-color: #ffffff;
+  width: 70%;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  z-index: 10;
+}
+
+.back-btn:hover {
+  background: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .tank-water1 {
+    flex-direction: column;
+    width: 95%;
+  }
+  .tank-water2 {
+    width: 95%;
+  }
+}
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  width: 50%;
+}
+
+.date-filter label {
+  font-weight: 500;
+}
+
+.filter-btn1 {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-btn:hover {
+  background-color: #0056b3;
+}
+.dashboard-topbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 25px;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  background: #ff4d4d;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.logout-btn:hover {
+  background: #d90429;
+}
+
+.dashboard-container {
+  padding-top: 80px !important; /* navbar space */
+}
+.unbind-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.unbind-btn:hover {
+  opacity: 0.9;
+}
+/* keep your existing CSS, and add/replace these bits */
+
+.chart-container {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(30, 70, 100, 0.06);
+  margin-top: 8px;
+}
+
+/* back button moved into topbar so keep both styles */
+.back-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.back-btn:hover {
+  background: #0056b3;
+}
+
+/* make filter buttons consistent */
+.filter-btn1 {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.filter-btn1:hover {
+  background-color: #0056b3;
+}
+
+/* small responsive tweaks */
+@media (max-width: 900px) {
+  .tank-water1 {
+    flex-direction: column;
+    width: 95%;
+  }
+  .tank-water2 {
+    width: 95%;
+  }
+  .date-filter {
+    width: 100%;
+  }
+}
