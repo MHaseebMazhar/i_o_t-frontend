@@ -5,11 +5,13 @@ import "./DeviceList.css";
 
 export default function DeviceList() {
   const [devices, setDevices] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({});
   const menuRef = useRef(null);
   const navigate = useNavigate();
-  const API_BASE = "http://localhost:5000/api/devices";
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
   // Bind Device Modal states
   const [bindModalOpen, setBindModalOpen] = useState(false);
@@ -34,19 +36,24 @@ export default function DeviceList() {
   };
 
   // =========================
-  // Fetch devices on mount
+  // Fetch devices
   // =========================
+  const fetchDevices = async (page = 1) => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/getAllDevices?page=${page}`);
+      const data = res.data.data;
+      setDevices(data.data || []);
+      setCurrentPage(data.current_page || 1);
+      setLastPage(data.last_page || 1);
+    } catch (err) {
+      console.error("Error fetching devices:", err);
+      if (err.response?.status === 401) navigate("/");
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get(API_BASE)
-      .then((res) => {
-        setDevices(res.data.devices || []);
-      })
-      .catch((err) => {
-        console.error("Error fetching devices:", err);
-        if (err.response?.status === 401) navigate("/");
-      });
-  }, [navigate]);
+    fetchDevices(currentPage);
+  }, [currentPage]);
 
   // =========================
   // Close action menu on outside click
@@ -58,14 +65,9 @@ export default function DeviceList() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // =========================
-  // Toggle action menu
-  // =========================
   const handleMenuToggle = (id, index, totalRows) => {
     setDropdownPosition({
       [id]: index >= totalRows - 2 ? "dd-above" : "dd-below",
@@ -73,93 +75,72 @@ export default function DeviceList() {
     setOpenMenuId((prev) => (prev === id ? null : id));
   };
 
-  // =========================
-  // Handle CRUD actions
-  // =========================
   const handleAction = (action, device) => {
-    if (action === "update") navigate(`/device-form/${device.id}`);
-    else if (action === "detail") navigate(`/devices/${device.id}`);
-    else if (action === "delete") {
-      if (window.confirm("Are you sure you want to delete this device?")) {
-        axios
-          .delete(`${API_BASE}/${device.id}`)
-          .then(() => {
-            alert("Device deleted successfully!");
-            setDevices(devices.filter((d) => d.id !== device.id));
-          })
-          .catch((err) => alert(err.response?.data?.message || err.message));
-      }
+  if (action === "update") {
+    navigate(`/device-form/${device.id}`, { state: { device } });
+  } else if (action === "detail") {
+    navigate(`/devices/${device.id}`);
+  } else if (action === "delete") {
+    if (window.confirm("Are you sure you want to delete this device?")) {
+      axios
+        .delete(`${API_BASE}/api/devices/${device.id}`)
+        .then(() => {
+          alert("Device deleted successfully!");
+          fetchDevices(currentPage);
+        })
+        .catch((err) => alert(err.response?.data?.message || err.message));
     }
-  };
+  }
+};
 
-  // =========================
-  // Open Bind Device Modal
-  // =========================
+
   const openBindModal = (device) => {
     setBindDevice(device);
     setSelectedUserId(null);
     setBindModalOpen(true);
 
     axios
-      .get("http://localhost:5000/api/users")
+      .get(`${API_BASE}/api/users`)
       .then((res) => setUsersList(res.data.users || []))
       .catch((err) => console.error(err));
   };
 
-  // =========================
-  // Close Bind Modal
-  // =========================
   const closeBindModal = () => {
     setBindModalOpen(false);
     setBindDevice(null);
     setSelectedUserId(null);
   };
 
-  // =========================
-  // Bind device to selected user
-  // =========================
   const handleBindDevice = async () => {
+    if (!selectedUserId) return alert("Select a user first!");
+
     try {
-      if (!selectedUserId) return alert("Select a user first!");
-
-      console.log("Binding device", bindDevice.id, "to user", selectedUserId);
-
       const res = await axios.post(
-        `http://localhost:5000/api/devices/${bindDevice.id}/bind`,
-        { userId: selectedUserId } // send number to server
+        `${API_BASE}/api/devices/${bindDevice.id}/bind`,
+        { userId: selectedUserId }
       );
 
       alert(res.data.message);
-
-      // Close modal and refresh device list
       closeBindModal();
-      const devicesRes = await axios.get("http://localhost:5000/api/devices");
-      setDevices(devicesRes.data.devices || []);
+      fetchDevices(currentPage);
     } catch (err) {
       console.error("Bind device error:", err);
       alert(err.response?.data?.message || err.message);
     }
   };
-  // =========================
-  // Render component
-  // =========================
   return (
     <div className="dl-container">
-      {/* Top Bar */}
       <div className="dl-topbar">
         <h2>📟 Device List</h2>
         <div className="dl-topbuttons">
-          <button
-            className="dl-addbtn"
-            onClick={() => navigate("/device-form")}
-          >
+          <button className="dl-addbtn" onClick={() => navigate("/device-form")}>
             AddNewDevice
           </button>
           <button
             className="dl-logoutbtn"
             onClick={() => {
-              localStorage.removeItem("token"); // same as dashboard
-              navigate("/", { replace: true }); // prevent back
+              localStorage.removeItem("token");
+              navigate("/", { replace: true });
             }}
           >
             Logout
@@ -167,7 +148,6 @@ export default function DeviceList() {
         </div>
       </div>
 
-      {/* Devices Table */}
       <div className="dl-tablewrapper">
         <table className="dl-table">
           <thead>
@@ -176,15 +156,12 @@ export default function DeviceList() {
               <th>Name</th>
               <th>Location</th>
               <th>Device ID</th>
-              <th>IOT User ID</th>
-              <th>Tank Shape</th>
-              <th>Tank Radius</th>
+              <th>User Name</th>
+              <th>Shape</th>
+              <th>Configuration</th>
               <th>Sensor Height Bottom</th>
               <th>Reading When Full</th>
-              <th>Tank Width</th>
-              <th>Tank Length</th>
-              <th>Updated At</th>
-              <th>Created At</th>
+              <th>Level</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -195,51 +172,40 @@ export default function DeviceList() {
                 <td>{d.name}</td>
                 <td>{d.location}</td>
                 <td>{d.device_id}</td>
-                <td>{d.iot_user_id}</td>
+                <td>{d.user_name || "-"}</td>
                 <td>{d.tank_shape}</td>
-                <td>{d.tank_radius}</td>
+                <td>
+                  <div style={{ lineHeight: "18px" }}>
+                    {d.tank_width ? <div><strong>W:</strong> {d.tank_width}</div> : null}
+                    {d.tank_length ? <div><strong>L:</strong> {d.tank_length}</div> : null}
+                    {d.tank_radius ? <div><strong>R:</strong> {d.tank_radius}</div> : null}
+
+                    {!d.tank_width && !d.tank_length && !d.tank_radius && (
+                      <div>-</div>
+                    )}
+                  </div>
+                </td>
+
                 <td>{d.sensor_height_bottom}</td>
                 <td>{d.reading_when_full}</td>
-                <td>{d.tank_width}</td>
-                <td>{d.tank_length}</td>
-                <td>{formatDate(d.updated_at)}</td>
-                <td>{formatDate(d.created_at)}</td>
+                <td>{d.percentage ? `${parseFloat(d.percentage).toFixed(0)}%` : "-"}</td>
                 <td>
-                  {/* Action Menu */}
-                  <div
-                    className="dl-actionmenu"
-                    ref={d.id === openMenuId ? menuRef : null}
-                  >
+                  <div className="dl-actionmenu" ref={d.id === openMenuId ? menuRef : null}>
                     <span
                       className="dl-menudot"
-                      onClick={() =>
-                        handleMenuToggle(d.id, index, devices.length)
-                      }
+                      onClick={() => handleMenuToggle(d.id, index, devices.length)}
                     >
                       &#x22EE;
                     </span>
                     {openMenuId === d.id && (
-                      <div
-                        className={`dl-menudropdown ${
-                          dropdownPosition[d.id] || "dd-below"
-                        }`}
-                      >
-                        <div
-                          className="dl-menuitem"
-                          onClick={() => handleAction("update", d)}
-                        >
+                      <div className={`dl-menudropdown ${dropdownPosition[d.id] || "dd-below"}`}>
+                        <div className="dl-menuitem" onClick={() => handleAction("update", d)}>
                           Update
                         </div>
-                        <div
-                          className="dl-menuitem"
-                          onClick={() => handleAction("detail", d)}
-                        >
+                        <div className="dl-menuitem" onClick={() => handleAction("detail", d)}>
                           Details
                         </div>
-                        <div
-                          className="dl-menuitem"
-                          onClick={() => openBindModal(d)}
-                        >
+                        <div className="dl-menuitem" onClick={() => openBindModal(d)}>
                           Bind Device
                         </div>
                       </div>
@@ -250,56 +216,39 @@ export default function DeviceList() {
             ))}
           </tbody>
         </table>
-        {/* =========================
-            Bind Device Modal
-           ========================= */}
+
+
+
         {bindModalOpen && (
           <div className="dl-bindmodal">
             <h3>Bind Device: {bindDevice?.name}</h3>
-
-            {/* Current User */}
             <p>
               Current User:{" "}
               {bindDevice?.iot_user_id
-                ? usersList.find(
-                    (u) => u.user_id === Number(bindDevice.iot_user_id)
-                  )?.full_name || "Unknown"
+                ? usersList.find((u) => u.user_id === Number(bindDevice.iot_user_id))
+                  ?.full_name || "Unknown"
                 : "None"}
             </p>
 
-            {/* User Dropdown */}
-            <div className="dl-userlist">
-              <select
-                className="dl-select"
-                value={selectedUserId || ""}
-                onChange={(e) => setSelectedUserId(Number(e.target.value))}
-              >
-                <option value="">Select User</option>
-                {usersList.map((user) => {
-                  const userIdNum = Number(user.user_id);
-                  const currentUserId = Number(bindDevice?.iot_user_id);
+            <select
+              className="dl-select"
+              value={selectedUserId || ""}
+              onChange={(e) => setSelectedUserId(Number(e.target.value))}
+            >
+              <option value="">Select User</option>
+              {usersList.map((user) => {
+                const userIdNum = Number(user.user_id);
+                const isCurrentUser = userIdNum === Number(bindDevice?.iot_user_id);
+                return (
+                  <option key={`user-${userIdNum}`} value={userIdNum} disabled={isCurrentUser}>
+                    {user.full_name} {isCurrentUser ? "(Already Bind)" : ""}
+                  </option>
+                );
+              })}
+            </select>
 
-                  // Disable option if it's the current user
-                  const isCurrentUser = userIdNum === currentUserId;
-
-                  return (
-                    <option
-                      key={`user-${userIdNum}`}
-                      value={userIdNum}
-                      disabled={isCurrentUser} // can't select current user
-                    >
-                      {user.full_name}
-                      {isCurrentUser ? " (Already Bind)" : ""}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Modal Buttons */}
             <div className="dl-modalactions">
               <button onClick={closeBindModal}>Cancel</button>
-
               <button
                 onClick={handleBindDevice}
                 disabled={!selectedUserId}
@@ -307,8 +256,6 @@ export default function DeviceList() {
               >
                 Bind
               </button>
-
-
             </div>
           </div>
         )}

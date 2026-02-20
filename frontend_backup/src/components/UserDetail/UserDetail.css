@@ -190,54 +190,90 @@
   background: #fafafa;
 }
 
-/* -----------------------------
-   Dropdown Menu (Matching Premium)
------------------------------- */
+/* -----------------------------------
+   PREMIUM ACTION MENU (FINAL)
+------------------------------------ */
 
-.action-menu {
+.user-action-menu {
   position: relative;
   display: inline-block;
 }
 
-.menu-dot {
+.user-menu-dot {
   cursor: pointer;
   font-size: 22px;
-  padding: 4px;
+  padding: 4px 8px;
   border-radius: 8px;
-  transition: 0.25s;
+  transition: 0.25s ease;
 }
 
-.menu-dot:hover {
+.user-menu-dot:hover {
   background: #eef2ff;
   color: #4f46e5;
 }
 
-.menu-dropdown {
+/* Dropdown */
+.user-menu-dropdown {
   position: absolute;
-  min-width: 150px;
-  background: white;
+  width: 160px;
+  background: #ffffff;
   border-radius: 14px;
-  box-shadow: 0px 14px 30px rgba(0,0,0,0.16);
+  padding: 8px 0;
+  box-shadow: 0px 14px 30px rgba(0,0,0,0.15);
   overflow: hidden;
-  animation: fadeMenu 0.25s ease-out;
-  z-index: 999;
+  animation: fadeMenu 0.2s ease-out;
+  z-index: 100;
 }
 
-.menu-dropdown.below { top: 30px; left: 0; }
-.menu-dropdown.above { bottom: 30px; left: 0; }
+/* Position below */
+.user-menu-dropdown.below {
+  top: 32px;
+  left: -10px;
+}
 
-.menu-item {
+/* Position above */
+.user-menu-dropdown.above {
+  bottom: 32px;
+  left: -10px;
+}
+
+.user-menu-item {
   padding: 12px 18px;
   cursor: pointer;
   font-size: 15px;
-  transition: 0.2s ease;
   color: #374151;
+  transition: background 0.2s ease, padding-left 0.2s;
 }
 
-.menu-item:hover {
+.user-menu-item:hover {
   background: #eef2ff;
   color: #4f46e5;
+  padding-left: 22px;
   font-weight: 600;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .user-menu-dropdown {
+    width: 140px;
+    left: -20px;
+  }
+
+  .user-menu-item {
+    padding: 10px 14px;
+  }
+}
+
+/* Animation */
+@keyframes fadeMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* -----------------------------

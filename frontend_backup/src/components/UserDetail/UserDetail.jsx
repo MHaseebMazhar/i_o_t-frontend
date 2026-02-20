@@ -1,10 +1,11 @@
-import React, { useRef,useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "./UserDetail.css";
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
   const [data, setData] = useState({ user: null, devices: [] });
   const [showNotifyBox, setShowNotifyBox] = useState(false);
   const [notifyTitle, setNotifyTitle] = useState("");
@@ -12,21 +13,31 @@ export default function UserDetail() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-const [openMenuId, setOpenMenuId] = useState(null);
-const [dropdownPosition, setDropdownPosition] = useState({});
-const menuRef = useRef(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({});
+  const menuRef = useRef(null);
+  useEffect(() => {
+  function handleClickOutside(event) {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setOpenMenuId(null);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/users/${id}`)
+      .get(`${API_BASE}/api/users/${id}`)
       .then((res) => setData(res.data))
       .catch((err) => console.error("API ERROR:", err));
-  }, [id]);
+  }, [id, API_BASE]);
 
   if (!data.user) return <h2 className="udp-loading">Loading...</h2>;
 
   // Handlers for buttons
   const handleBack = () => navigate(-1);
-
   const handleUpdatePassword = () => {
     if (!newPassword || !confirmPassword) {
       return alert("Please fill both fields");
@@ -36,7 +47,7 @@ const menuRef = useRef(null);
     }
 
     axios
-      .post(`http://localhost:5000/api/users/${id}/change-password`, {
+      .post(`${API_BASE}/api/users/${id}/change-password`, {
         newPassword,
       })
       .then((res) => {
@@ -56,7 +67,7 @@ const menuRef = useRef(null);
     }
 
     axios
-      .post("http://localhost:5000/api/notify/send", {
+      .post(`${API_BASE}/api/notify/send`, {
         userId: id,
         title: notifyTitle,
         message: notifyMessage,
@@ -71,33 +82,36 @@ const menuRef = useRef(null);
         alert(err.response?.data?.message || "Error sending notification");
       });
   };
-const handleMenuToggle = (id, index, totalRows) => {
-  setDropdownPosition({
-    [id]: index >= totalRows - 2 ? "above" : "below",
-  });
-  setOpenMenuId(openMenuId === id ? null : id);
-};
+  const handleMenuToggle = (id, index, totalRows) => {
+      const position = index >= totalRows - 2 ? "above" : "below";
+    setDropdownPosition((prev) => ({
+      ...prev,
+      [id]: position
+    }));
+    
+  setOpenMenuId((prev) => (prev === id ? null : id));
+  };
 
-const handleDeviceAction = (action, device) => {
-  if (action === "update") {
-    navigate(`/device-form/${device.id}`, { state: { from: `/users/${data.user.user_id}` } });
-  } else if (action === "delete") {
-    if (window.confirm("Are you sure you want to delete this device?")) {
-      axios
-        .delete(`http://localhost:5000/api/devices/${device.id}`)
-        .then(() => {
-          alert("Device deleted successfully!");
-          setData({
-            ...data,
-            devices: data.devices.filter((d) => d.id !== device.id),
-          });
-        })
-        .catch((err) => alert(err.response?.data?.message || err.message));
+  const handleDeviceAction = (action, device) => {
+    if (action === "update") {
+      navigate(`/device-form/${device.id}`, { state: { from: `/users/${data.user.user_id}` } });
+    } else if (action === "delete") {
+      if (window.confirm("Are you sure you want to delete this device?")) {
+        axios
+          .delete(`${API_BASE}/api/devices/${device.id}`)
+          .then(() => {
+            alert("Device deleted successfully!");
+            setData({
+              ...data,
+              devices: data.devices.filter((d) => d.id !== device.id),
+            });
+          })
+          .catch((err) => alert(err.response?.data?.message || err.message));
+      }
+    } else if (action === "detail") {
+      navigate(`/devices/${device.id}`);
     }
-  } else if (action === "detail") {
-    navigate(`/devices/${device.id}`);
-  }
-};
+  };
 
   return (
     <div className="udp-container">
@@ -230,58 +244,49 @@ const handleDeviceAction = (action, device) => {
               <th>ID</th>
               <th>Device Name</th>
               <th>Location</th>
-               <th>Actions</th> 
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data.devices.map((d,index) => (
+            {data.devices.map((d, index) => (
               <tr key={d.id}>
                 <td>{d.id}</td>
                 <td>{d.name}</td>
                 <td>{d.location}</td>
                 <td>
-            <div
-              className="action-menu"
-              ref={d.id === openMenuId ? menuRef : null}
-            >
-              <span
-                className="menu-dot"
-                onClick={() =>
-                  handleMenuToggle(d.id, index, data.devices.length)
-                }
-              >
-                &#x22EE;
-              </span>
-              {openMenuId === d.id && (
-                <div
-                  className={`menu-dropdown ${
-                    dropdownPosition[d.id] || "below"
-                  }`}
-                >
-                  <div
-                    className="menu-item"
-                    onClick={() => handleDeviceAction("update", d)}
-                  >
-                    Update
-                  </div>
+                  <div className="user-action-menu">
+                    <span
+                      className="user-menu-dot"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMenuToggle(d.id, index, data.devices.length);
+                      }}
+                    >
+                      &#x22EE;
+                    </span>
 
-                  <div
-                    className="menu-item"
-                    onClick={() => handleDeviceAction("delete", d)}
-                  >
-                    Delete
-                  </div>
+                    {openMenuId === d.id && (
+                      <div
+                        className={`user-menu-dropdown ${dropdownPosition[d.id] === "above" ? "above" : "below"
+                          }`}
+                      >
+                        <div
+                          className="user-menu-item"
+                          onClick={() => handleDeviceAction("update", d)}
+                        >
+                          Update
+                        </div>
 
-                  <div
-                    className="menu-item"
-                    onClick={() => handleDeviceAction("detail", d)}
-                  >
-                    Details
+                        <div
+                          className="user-menu-item"
+                          onClick={() => handleDeviceAction("detail", d)}
+                        >
+                          Details
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
-          </td>
+                </td>
               </tr>
             ))}
           </tbody>

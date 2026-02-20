@@ -10,47 +10,75 @@ import DatePicker from "react-datepicker";
 export default function DeviceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
+
   const [device, setDevice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [series, setSeries] = useState([]);
-  const [readings, setReadings] = useState([]);
+const [chartData, setChartData] = useState({ series: [] });
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [rawReadings, setRawReadings] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const API_BASE = "http://localhost:5000/api/devices";
+  // Utility to get WiFi quality
+  const getWifiQuality = (rssi) => {
+    if (rssi >= -55) return "Excellent";
+    if (rssi >= -65) return "Good";
+    if (rssi >= -75) return "Low";
+    return "Weak";
+  };
 
-  useEffect(() => {
-    setSeries([
-      {
-        name: "Water Level (%)",
-        data: readings,
-      },
-    ]);
-  }, [readings]);
+  // Menu event handler
+  const handleMenuClick = async (eventId) => {
+    setMenuOpen(false);
+    try {
+      const payload = { device_id: device.device_id, event_id: eventId };
+      const res = await axios.post(`http://119.159.147.162:8186/send-data`, payload);
+      let response = res.data.ws_response;
 
+      if (eventId === "2006") {
+        try {
+          const wifiData = JSON.parse(response);
+          const quality = getWifiQuality(wifiData.signal);
+          response = `SSID: ${wifiData.ssid}\nPASSWORD: ${wifiData.password}\nSIGNAL: ${quality}`;
+        } catch (e) { console.error("WiFi parse error:", e); }
+      }
+
+      if (eventId === "2008") {
+        try {
+          const live = JSON.parse(response);
+          response = `Sensor Value: ${live.sensor_value}`;
+        } catch (e) { console.error("Live Data parse error:", e); }
+      }
+
+      alert(response);
+    } catch (err) {
+      console.error(err);
+      alert("Error: " + (err.response?.data?.error || err.message));
+    }
+  };
+
+  // Fetch device info and last 24h readings
   useEffect(() => {
     const fetchDeviceAndReadings = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${API_BASE}/${id}`);
-        setDevice(res.data.device);
+        const res = await axios.get(`${API_BASE}/api/devices/${id}`);
+        const data = res.data.data;
+        setDevice(data);
 
-        // fetch last 24 hours by default
+        // Default last 24h readings
+        const start = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const end = new Date();
+        setStartDate(start);
+        setEndDate(end);
+
         const readingsRes = await axios.get(
-          `${API_BASE}/${id}/readings?start=${new Date(
-            new Date().getTime() - 24 * 60 * 60 * 1000
-          ).toISOString()}&end=${new Date().toISOString()}`
+          `${API_BASE}/api/devices/${id}/readings?start=${start.toISOString()}&end=${end.toISOString()}`
         );
-        const data = readingsRes.data.readings || [];
-        const defaultStart = new Date(
-          new Date().getTime() - 24 * 60 * 60 * 1000
-        );
-        const defaultEnd = new Date();
-        setStartDate(defaultStart);
-        setEndDate(defaultEnd);
-        setRawReadings(data);
+
+        // Directly use chartData from API
+        setChartData(readingsRes.data.chartData);
       } catch (err) {
         console.error(err);
         setError("Failed to fetch device data.");
@@ -60,35 +88,25 @@ export default function DeviceDetail() {
     };
 
     fetchDeviceAndReadings();
-  }, [id]);
+  }, [id, API_BASE]);
 
+  // Handle date filter
   const handleDateFilter = async () => {
-    if (!startDate || !endDate) {
-      alert("Please select both start and end dates!");
-      return;
-    }
-
+    if (!startDate || !endDate) return alert("Please select both dates!");
     try {
-      const response = await axios.get(
-        `${API_BASE}/${id}/readings?start=${startDate.toISOString()}&end=${endDate.toISOString()}`
+      const res = await axios.get(
+        `${API_BASE}/api/devices/${id}/readings?start=${startDate.toISOString()}&end=${endDate.toISOString()}`
       );
-      const data = response.data.readings || response.data.data || [];
-      if (!data.length) {
+
+      if (!res.data.readings.length) {
         alert("No data found for selected range!");
-        setReadings([]);
+        setChartData({ series: [] });
         return;
       }
 
-      // --- Use raw readings directly ---
-      const seriesData = data.map((r) => ({
-        x: new Date(r.updated_at),
-        y: Number(r.percentage_full ?? r.value ?? 0),
-      }));
-
-      setReadings(seriesData);
-      setRawReadings(data); // keep for tooltip exact value
-    } catch (error) {
-      console.error("Error filtering data:", error);
+      setChartData(res.data.chartData); // <- directly use chartData
+    } catch (err) {
+      console.error(err);
       alert("Error fetching filtered data!");
     }
   };
@@ -106,56 +124,33 @@ export default function DeviceDetail() {
       type: "datetime",
       min: startDate?.getTime(),
       max: endDate?.getTime(),
-      tickAmount: 24, // 24 equal parts
+      tickAmount: 24,
       labels: {
         datetimeUTC: false,
-        formatter: (val) => {
-          return new Date(val).toLocaleTimeString([], {
-            month: "short", // e.g., Nov
-            day: "numeric", // e.g., 13
+        formatter: (val) =>
+          new Date(val).toLocaleTimeString([], {
+            month: "short",
+            day: "numeric",
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
-          });
-        },
+          }),
       },
     },
     yaxis: {
       min: 0,
       max: 100,
       title: { text: "Water Level (%)" },
-      labels: {
-        formatter: (val) => `${Math.round(val)}%`,
-      },
+      labels: { formatter: (val) => `${Math.round(val)}%` },
     },
     tooltip: {
       x: { format: "dd-MM-yyyy HH:mm" },
       y: {
-        formatter: function (val, opts) {
+        formatter: (val, opts) => {
           const index = opts.dataPointIndex;
-          const hovered = series[0].data[index];
-          if (!hovered) return val;
-
-          // match real reading nearest to hovered point
-          const raw = rawReadings.reduce((closest, r) => {
-            const t = new Date(
-              r.updated_at || r.timestamp || r.time || r.x
-            ).getTime();
-            const diff = Math.abs(t - hovered.x.getTime());
-            if (!closest || diff < closest.diff) return { r, diff };
-            return closest;
-          }, null);
-
-          if (!raw) return val;
-
-          let exact = Number(
-            raw.r.percentage_full ??
-              raw.r.percentage ??
-              raw.r.value ??
-              raw.r.y ??
-              0
-          );
-          return `${exact.toFixed(2)}%`;
+          const point = chartData.series[0]?.data[index];
+          if (!point) return val;
+          return `${point.percentage}% (Water Height: ${point.waterHeight} cm, Volume: ${point.volume} L)`;
         },
       },
     },
@@ -168,145 +163,59 @@ export default function DeviceDetail() {
     <div className="Container">
       <div className="Heading">
         <h1>Water Tank Monitoring System</h1>
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          ⬅ Back
-        </button>
+        <button className="back-btn" onClick={() => navigate(-1)}>⬅ Back</button>
       </div>
 
       <div className="tank-water1">
         <div className="tank-visualization">
           <h2>Tank Visualization</h2>
           <hr />
-
+          <div className="menu-dot-container">
+            <button className="menu-dot" onClick={() => setMenuOpen(!menuOpen)}>⋮</button>
+            {menuOpen && (
+              <div className="menu-dropdown">
+                <button onClick={() => handleMenuClick("2008")}>Live Data</button>
+                <button onClick={() => handleMenuClick("2006")}>WiFi Data</button>
+                <button onClick={() => handleMenuClick("2002")}>Restart Device</button>
+                <button onClick={() => handleMenuClick("2004")}>Current Status</button>
+              </div>
+            )}
+          </div>
           <div className="tank-image">
-            <div className="tank-image-upper">
-              <button></button>
-            </div>
             <div
               className="tank-image-container"
-              style={{ height: `${device.percentage_full ?? 0}%` }}
+              style={{ height: `${device.percentage ?? 0}%` }}
             >
-              <svg
-                className="waves"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 24 150 28"
-                preserveAspectRatio="none"
-              >
+              <svg className="waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 24 150 28" preserveAspectRatio="none">
                 <defs>
-                  <path
-                    id="gentle-wave"
-                    d="M-160 44c30 0 58-18 88-18s58 18 88 18
-               58-18 88-18 58 18 88 18 v44h-352z"
-                  />
+                  <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
                 </defs>
                 <g className="parallax">
-                  <use
-                    href="#gentle-wave"
-                    x="48"
-                    y="0"
-                    fill="rgb(53,158,255)"
-                  />
-                  <use
-                    href="#gentle-wave"
-                    x="48"
-                    y="3"
-                    fill="rgb(39,134,223)"
-                  />
-                  <use
-                    href="#gentle-wave"
-                    x="48"
-                    y="5"
-                    fill="rgb(56,145,228)"
-                  />
-                  <use
-                    href="#gentle-wave"
-                    x="48"
-                    y="7"
-                    fill="rgb(46,154,255)"
-                  />
+                  <use href="#gentle-wave" x="48" y="0" fill="rgb(53,158,255)" />
+                  <use href="#gentle-wave" x="48" y="3" fill="rgb(39,134,223)" />
+                  <use href="#gentle-wave" x="48" y="5" fill="rgb(56,145,228)" />
+                  <use href="#gentle-wave" x="48" y="7" fill="rgb(46,154,255)" />
                 </g>
               </svg>
-              <p className="tank-percentage">
-                <b>{parseFloat(device.percentage_full ?? 0).toFixed(0)}%</b>
-              </p>
+              <p className="tank-percentage"><b>{parseFloat(device.percentage ?? 0).toFixed(0)}%</b></p>
             </div>
           </div>
         </div>
 
         <div className="tank-info">
-          <h2>
-            Tank Details Info ({device.name}{" "}
-            {device.location ? `- ${device.location}` : ""})
-          </h2>
+          <h2>Tank Details Info ({device.name} {device.location ? `- ${device.location}` : ""})</h2>
           <hr />
-          <p>
-            <span>System Status:</span>
-            <span
-              className={device.is_online ? "status-online" : "status-offline"}
-            >
+          <p><span>System Status:</span>
+            <span className={device.is_online ? "status-online" : "status-offline"}>
               {device.is_online ? "Online" : "Offline"}
             </span>
-            {/* Only show unbind button if bound */}
-            {device.iot_user_id ? (
-              <button
-                className="unbind-btn"
-                onClick={async () => {
-                  if (
-                    !window.confirm(
-                      "Are you sure you want to unbind this device?"
-                    )
-                  )
-                    return;
-
-                  try {
-                    const res = await axios.post(
-                      `http://localhost:5000/api/devices/${device.id}/unbind`
-                    );
-                    alert(res.data.message);
-                    setDevice({ ...device, iot_user_id: null });
-                  } catch (err) {
-                    console.error("Unbind error:", err);
-                    alert(err.response?.data?.message || err.message);
-                  }
-                }}
-                style={{
-                  backgroundColor: "#dc3545",
-                  color: "#fff",
-                  marginLeft: "47%", // align right properly
-                }}
-              >
-                Unbind Device
-              </button>
-            ) : null}{" "}
-            {/* Nothing shows if unbound */}
           </p>
-
-          <p>
-            <span>Sensor Reading:</span>
-            <span>
-              {readings[readings.length - 1]?.y ?? device.sensor_value ?? "-"}
-            </span>
-          </p>
-          <p>
-            <span>Water Height:</span>
-            <span>{device.water_height_cm?.toFixed(2)} cm</span>
-          </p>
-          <p>
-            <span>Percent Full:</span>
-            <span>{device.percentage_full?.toFixed(2)}%</span>
-          </p>
-          <p>
-            <span>Tank Volume:</span>
-            <span>{device.tank_volume_liters?.toFixed(2)} L</span>
-          </p>
-          <p>
-            <span>Max Capacity:</span>
-            <span>{device.maxCapacity?.toFixed(2)} L</span>
-          </p>
-          <p>
-            <span>Last Updated:</span>
-            <span>{new Date(device.updated_at).toLocaleString()}</span>
-          </p>
+          <p><span>Sensor Reading:</span><span>{device.currentReading ?? "-"} cm</span></p>
+          <p><span>Water Height:</span><span>{device.waterHeight} cm</span></p>
+          <p><span>Percent Full:</span><span>{device.percentage} %</span></p>
+          <p><span>Tank Volume:</span><span>{device.volume} L</span></p>
+          <p><span>Max Capacity:</span><span>{device.maxCapacity} L</span></p>
+          <p><span>Last Updated:</span><span>{device.last_update}</span></p>
         </div>
       </div>
 
@@ -315,38 +224,28 @@ export default function DeviceDetail() {
         <div className="date-filter">
           <label>Start:</label>
           <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            showTimeSelect
-            timeFormat="HH:mm"
-            timeIntervals={5}
-            dateFormat="dd-MM-yyyy HH:mm"
-            placeholderText="Select start date & time"
-            maxDate={new Date()}
+            selected={startDate} onChange={(date) => setStartDate(date)}
+            showTimeSelect timeFormat="HH:mm" timeIntervals={5} dateFormat="dd-MM-yyyy HH:mm"
+            maxDate={new Date()} placeholderText="Select start date & time"
           />
           <label>End:</label>
           <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            showTimeSelect
-            timeFormat="HH:mm"
-            timeIntervals={5}
-            dateFormat="dd-MM-yyyy HH:mm"
-            placeholderText="Select end date & time"
-            minDate={startDate}
-            maxDate={new Date()}
+            selected={endDate} onChange={(date) => setEndDate(date)}
+            showTimeSelect timeFormat="HH:mm" timeIntervals={5} dateFormat="dd-MM-yyyy HH:mm"
+            minDate={startDate} maxDate={new Date()}
           />
-          <button onClick={handleDateFilter} className="filter-btn1">
-            Apply Filter
-          </button>
+          <button onClick={handleDateFilter} className="filter-btn1">Apply Filter</button>
         </div>
-
         <hr />
-
         <div className="chart-container">
-          <Chart options={options} series={series} type="area" height={350} />
-        </div>
+          <Chart
+            options={options}
+            series={chartData.series}
+            type="area"
+            height={350}
+          />
 
+        </div>
         {error && <p className="error">{error}</p>}
       </div>
     </div>

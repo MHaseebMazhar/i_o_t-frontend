@@ -63,6 +63,7 @@
   padding: 14px 12px;
   font-size: 15px;
   font-weight: 600;
+  margin-bottom: 2%;
 }
 
 .ut-table td {
@@ -129,7 +130,7 @@
 
 /* Menu items */
 .ut-dropdown-item {
-  padding: 10px 14px;
+  padding: 2px 8px;
   cursor: pointer;
   font-size: 14px;
   border-bottom: 1px solid #eef0fa;

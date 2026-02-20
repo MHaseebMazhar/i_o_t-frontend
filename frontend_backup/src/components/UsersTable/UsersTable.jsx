@@ -9,11 +9,11 @@ export default function UsersTable() {
   const [dropdownPosition, setDropdownPosition] = useState({});
   const menuRef = useRef(null);
   const navigate = useNavigate();
-
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users");
+        const res = await axios.get(`${API_BASE}/api/users`);
         if (res.data.success) {
           setUsers(res.data.users);
         } else {
@@ -24,7 +24,7 @@ export default function UsersTable() {
       }
     };
     fetchUsers();
-  }, []);
+  }, [API_BASE]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -49,7 +49,7 @@ export default function UsersTable() {
     } else if (action === "delete") {
       if (window.confirm(`Are you sure you want to delete ${user.full_name}?`)) {
         axios
-          .delete(`http://localhost:5000/api/users/${user.user_id}`)
+          .delete(`${API_BASE}/api/users/${user.user_id}`)
           .then(() => {
             alert("User deleted successfully!");
             setUsers(users.filter((u) => u.user_id !== user.user_id));

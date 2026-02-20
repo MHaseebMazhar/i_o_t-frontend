@@ -2,11 +2,11 @@
    Container
    ========================= */
 .dl-container {
-  max-width: 95%;
-  margin: 40px auto;
+  max-width: 100%;
+  margin: 0px auto;
   background: #ffffff;
   border-radius: 16px;
-  padding: 25px;
+  padding: 0px 25px 0px 25px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
   font-family: "Segoe UI", Roboto, sans-serif;
   position: relative;

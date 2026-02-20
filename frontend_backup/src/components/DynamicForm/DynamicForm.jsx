@@ -9,13 +9,13 @@ export default function DynamicForm() {
   const navigate = useNavigate();
   const location = useLocation();
 const [toast, setToast] = useState({ message: "", visible: false });
-
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
   // Detect whether we're editing a device or a user
   const isDevice = location.pathname.includes("/device");
-  const API_BASE = isDevice
-    ? "http://localhost:5000/api/devices"
-    : "http://localhost:5000/api/users";
-
+  const BASE = isDevice 
+  ? `${API_BASE}/api/devices`
+    : `${API_BASE}/api/users`;
+ 
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,10 +24,14 @@ const [toast, setToast] = useState({ message: "", visible: false });
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    const url = `${BASE}/${id}`;
+    console.log("Fetching data for ID1:", url);
     axios
-      .get(`${API_BASE}/${id}`)
+      .get(url)
       .then((res) => {
+        console.log("Fetched data:", res.data);
         const data = res.data.device || res.data.user || res.data;
+
         setFormData(data);
         setLoading(false);
       })
@@ -36,7 +40,7 @@ const [toast, setToast] = useState({ message: "", visible: false });
         setError("Failed to fetch details");
         setLoading(false);
       });
-  }, [id, API_BASE]);
+  }, [id,BASE]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -55,8 +59,8 @@ const handleSubmit = async (e) => {
 
   try {
     const method = id ? "put" : "post";
-    const url = id ? `${API_BASE}/${id}` : API_BASE;
-
+    const url = id ? `${BASE}/${id}` : BASE;
+console.log("Submitting to URL:", url, "with data:", formData);
     const res = await axios[method](url, formData);
 
     // Show toast
@@ -67,7 +71,7 @@ const handleSubmit = async (e) => {
       setToast({ message: "", visible: false });
       const from = location.state?.from || (isDevice ? "/devices" : "/users");
       navigate(from);
-    }, 2000);
+    }, 500);
   } catch (err) {
     console.error("Error submitting form:", err);
     setError(err.response?.data?.message || "Submit failed!");
@@ -75,14 +79,9 @@ const handleSubmit = async (e) => {
     setLoading(false);
   }
 };
-
-
-
   if (loading) return <p>Loading...</p>;
-
   // Determine back page for Cancel button
   const backPage = location.state?.from || (isDevice ? "/devices" : "/users");
-
   return (
     <div className="dynamic-form-container">
       <h2>

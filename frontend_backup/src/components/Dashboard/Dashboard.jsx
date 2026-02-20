@@ -5,6 +5,7 @@ import "./Dashboard.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -14,10 +15,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/dashboard")
+      .get(`${API_BASE}/api/dashboard`)
       .then((res) => setStats(res.data))
       .catch((err) => console.error("Dashboard API error:", err));
-  }, []);
+  }, [API_BASE]);
 
   // 🔹 LOGOUT FUNCTION
   const handleLogout = () => {

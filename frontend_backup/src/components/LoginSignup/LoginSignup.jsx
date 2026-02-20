@@ -10,11 +10,11 @@ export default function LoginSignup() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/signup", { name, email, password });
+      const res = await axios.post(`${API_BASE}/signup`, { name, email, password });
       setMessage(res.data.message);
     } catch (err) {
       setMessage(err.response?.data?.message || "Signup failed");
@@ -24,7 +24,7 @@ export default function LoginSignup() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/login", { email, password });
+      const res = await axios.post(`${API_BASE}/login`, { email, password });
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
 
