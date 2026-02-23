@@ -10,6 +10,7 @@
     "apexcharts": "^5.3.6",
     "axios": "^1.13.1",
     "cors": "^2.8.5",
+    "express": "^5.2.1",
     "firebase": "^12.6.0",
     "react": "^19.2.0",
     "react-apexcharts": "^1.8.0",
@@ -26,7 +27,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "serve:prod": "serve -s build -l 3001"
-
   },
   "eslintConfig": {
     "extends": [
